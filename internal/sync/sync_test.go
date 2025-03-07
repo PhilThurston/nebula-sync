@@ -1,21 +1,28 @@
 package sync
 
 import (
+	"testing"
+
 	"github.com/lovelaze/nebula-sync/internal/config"
 	piholemock "github.com/lovelaze/nebula-sync/internal/mocks/pihole"
 	"github.com/lovelaze/nebula-sync/internal/pihole"
 	"github.com/lovelaze/nebula-sync/internal/pihole/model"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func Test_target_authenticate(t *testing.T) {
 	primary := piholemock.NewClient(t)
 	replica := piholemock.NewClient(t)
 
+	mockClient := &config.Client{
+		SkipSSLVerification: false,
+		RetryDelay:          1,
+	}
+
 	target := target{
 		Primary:  primary,
 		Replicas: []pihole.Client{replica},
+		Client:   mockClient,
 	}
 
 	primary.EXPECT().PostAuth().Once().Return(nil)
@@ -29,9 +36,15 @@ func Test_target_deleteSessions(t *testing.T) {
 	primary := piholemock.NewClient(t)
 	replica := piholemock.NewClient(t)
 
+	mockClient := &config.Client{
+		SkipSSLVerification: false,
+		RetryDelay:          1,
+	}
+
 	target := target{
 		Primary:  primary,
 		Replicas: []pihole.Client{replica},
+		Client:   mockClient,
 	}
 
 	primary.EXPECT().DeleteSession().Once().Return(nil)
@@ -45,9 +58,15 @@ func Test_target_syncTeleporters(t *testing.T) {
 	primary := piholemock.NewClient(t)
 	replica := piholemock.NewClient(t)
 
+	mockClient := &config.Client{
+		SkipSSLVerification: false,
+		RetryDelay:          1,
+	}
+
 	target := target{
 		Primary:  primary,
 		Replicas: []pihole.Client{replica},
+		Client:   mockClient,
 	}
 
 	gravitySettings := config.GravitySettings{
@@ -72,9 +91,15 @@ func Test_target_syncConfigs(t *testing.T) {
 	primary := piholemock.NewClient(t)
 	replica := piholemock.NewClient(t)
 
+	mockClient := &config.Client{
+		SkipSSLVerification: false,
+		RetryDelay:          1,
+	}
+
 	target := target{
 		Primary:  primary,
 		Replicas: []pihole.Client{replica},
+		Client:   mockClient,
 	}
 
 	configResponse := model.ConfigResponse{Config: make(map[string]interface{})}
@@ -102,9 +127,15 @@ func Test_target_runGravity(t *testing.T) {
 	primary := piholemock.NewClient(t)
 	replica := piholemock.NewClient(t)
 
+	mockClient := &config.Client{
+		SkipSSLVerification: false,
+		RetryDelay:          1,
+	}
+
 	target := target{
 		Primary:  primary,
 		Replicas: []pihole.Client{replica},
+		Client:   mockClient,
 	}
 
 	primary.EXPECT().PostRunGravity().Once().Return(nil)
