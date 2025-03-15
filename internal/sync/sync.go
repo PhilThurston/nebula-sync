@@ -43,21 +43,19 @@ func (target *target) authenticate() (err error) {
 	return err
 }
 
-func (target *target) deleteSessions() (err error) {
+func (target *target) deleteSessions() {
 	log.Info().Msg("Invalidating sessions...")
 	if err := target.Primary.DeleteSession(); err != nil {
-		return err
+		log.Warn().Msgf("Failed to close session for target : %s", target.Primary.String())
 	}
 
 	for _, replica := range target.Replicas {
 		if err := withRetry(func() error {
 			return replica.DeleteSession()
 		}, AttemptsDeleteSession, target.Client.RetryDelay); err != nil {
-			return err
+			log.Warn().Msgf("Failed to close session for target : %s", replica.String())
 		}
 	}
-
-	return err
 }
 
 func (target *target) syncTeleporters(gravitySettings *config.GravitySettings) error {
@@ -126,9 +124,7 @@ func createPatchConfigRequest(config *config.ConfigSettings, configResponse *mod
 	patchConfig := model.PatchConfig{}
 
 	if config.DNS {
-		i := configResponse.Config["dns"]
-		m := i.(map[string]interface{})
-		patchConfig.DNS = m
+		patchConfig.DNS = configResponse.Config["dns"].(map[string]interface{})
 	}
 	if config.DHCP {
 		patchConfig.DHCP = configResponse.Config["dhcp"].(map[string]interface{})
